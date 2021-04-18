@@ -407,7 +407,14 @@ void display(void) {
     // backwards.  You'll need to add appropriate rotations.
 
     view = Translate(0.0, 0.0, -viewDist);
-
+    
+    //Part a
+    mat4 horizontal = RotateY(camRotSidewaysDeg);
+    mat4 vertical = RotateX(camRotUpAndOverDeg);
+    
+    //modify view based on the horizontal and vertical rotation
+    view = view * horizontal * vertical;
+    
     SceneObject lightObj1 = sceneObjs[1];
     vec4 lightPosition = view * lightObj1.loc;
 
