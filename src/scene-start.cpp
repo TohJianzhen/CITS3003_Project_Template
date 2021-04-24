@@ -415,11 +415,47 @@ void display(void) {
     //modify view based on the horizontal and vertical rotation
     view = view * horizontal * vertical;
     
+    //Light 1
     SceneObject lightObj1 = sceneObjs[1];
     vec4 lightPosition = view * lightObj1.loc;
 
+    //Light 2
+    mat4 light_movement = horizontal * vertical;
+    SceneObject lightObj2 = sceneObjs[2];
+    vec4 light_position_2 = light_movement * lightObj2.loc;
+
+    //Light 3
+    SceneObject lightObj3 = sceneObjs[3];
+    float light_vert = lightObj3.angles[1]; //Equivalent to pitch of light 
+    float light_hori = lightObj3.angles[2]; //Equivalent to yaw of light
+    vec4 light_position_3 = view * lightObj3.loc;
+
     glUniform4fv(glGetUniformLocation(shaderProgram, "LightPosition"),
                  1, lightPosition);
+    CheckError();
+
+    glUniform1f(glGetUniformLocation(shaderProgram, "brightness"), lightObj1.brightness);
+    CheckError();
+
+    glUniform1f(glGetUniformLocation(shaderProgram, "brightness_2"), lightObj2.brightness);
+    CheckError();
+
+    glUniform1f(glGetUniformLocation(shaderProgram, "brightness_3"), lightObj3.brightness);
+    CheckError();
+
+    glUniform1f(glGetUniformLocation(shaderProgram, "pitch"), light_hori);
+    CheckError();
+
+    glUniform1f(glGetUniformLocation(shaderProgram, "yaw"), light_vert);
+    CheckError();
+
+    glUniform3fv(glGetUniformLocation(shaderProgram, "color_1"), 1, lightObj1.rgb);
+    CheckError();
+
+    glUniform3fv(glGetUniformLocation(shaderProgram, "color_2"), 1, lightObj2.rgb);
+    CheckError();
+
+    glUniform3fv(glGetUniformLocation(shaderProgram, "color_3"), 1, lightObj3.rgb);
     CheckError();
 
     for (int i = 0; i < nObjects; i++) {
