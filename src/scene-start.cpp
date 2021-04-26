@@ -565,6 +565,12 @@ static void adjustSpecularShine(vec2 ss)
     sceneObjs[toolObj].shine += ss[1];
 }
 
+static void RotateObj(vec2 xz)
+{
+    sceneObjs[toolObj].angles[2] += 20 * xz[0];
+    sceneObjs[toolObj].angles[1] += 20 * xz[1];
+}
+
 static void lightMenu(int id)
 {
     deactivateTool();
@@ -667,6 +673,78 @@ static void mainmenu(int id)
         exit(0);
 }
 
+int selected_object = 0;
+
+static void select_object(int id)
+{
+    deactivateTool();
+    if (id >= 200)
+    {
+        selected_object = id;
+        currObject = toolObj = selected_object - 200;
+    }
+}
+
+static void manipulate_objs(int id) {
+    if (selected_object == 0 || selected_object < 204) {
+        return;
+    }
+
+    deactivateTool();
+
+    if (id == 66) { // Duplicate Object
+        vec2 currPos = currMouseXYworld(camRotSidewaysDeg);
+        int duplicate_object_pos = selected_object - 200; // Reverse offset
+
+        sceneObjs[nObjects] = sceneObjs[duplicate_object_pos];
+        sceneObjs[nObjects].loc[0] = currPos[0] + 0.01; // Offsets position of new object to demonstrate it has been duplicated.
+        sceneObjs[nObjects].loc[2] = currPos[1] + 0.01; // Offsets position of new object to demonstrate it has been duplicated.
+
+        // Essentially replicating function to add new object to scene.
+        toolObj = currObject = nObjects++;
+        setToolCallbacks(adjustLocXZ, camRotZ(),
+            adjustScaleY, mat2(0.05, 0, 0, 10.0));
+
+        selected_object = 0; // No object is now selected.
+
+        glutPostRedisplay();
+    }
+
+    if (id == 67) { // Delete Object
+        //cout << "menu in use = " << sceneObs...; //test
+        //int shuffle;
+        if (nObjects <= 4) { //No objects to delete
+            return;
+        }
+
+        if ((selected_object - 200) != (nObjects - 1)) {
+            for (int i = 0; i < ((nObjects - 1) - (selected_object - 200) + 1); i++) {
+                sceneObjs[selected_object - 200 + i] = sceneObjs[selected_object - 200 + 1 + i]; //Shuffle items to keep indexing correct.
+            }
+        }
+
+        else if ((selected_object - 200) == (nObjects - 1)) {
+            sceneObjs[selected_object - 200] = sceneObjs[selected_object - 200 + 1];
+        }
+
+        nObjects = nObjects - 1;
+        if (nObjects > 4) {
+            select_object(nObjects - 1 + 200);
+            doRotate();
+        }
+
+        else {
+            currObject = -1;
+            toolObj = -1;
+            selected_object = 0;
+            doRotate();
+        }
+
+        glutPostRedisplay();
+
+    }
+}
+
 static void makeMenu()
 {
     int objectId = createArrayMenu(numMeshes, objectMenuEntries, objectMenu);
@@ -678,7 +756,21 @@ static void makeMenu()
     int texMenuId = createArrayMenu(numTextures, textureMenuEntries, texMenu);
     int groundMenuId = createArrayMenu(numTextures, textureMenuEntries, groundMenu);
 
+    int selection_id = glutCreateMenu(select_object);
     int lightMenuId = glutCreateMenu(lightMenu);
+
+    for (int i = 4; i < nObjects; i++) {
+        char fig_name[248];
+        strcpy(fig_name, objectMenuEntries[sceneObjs[i].meshId - 1]);
+        int new_objects_id = i + 200; 
+        glutAddMenuEntry(strcat(fig_name, textureMenuEntries[sceneObjs[i].texId - 1]), new_objects_id); 
+
+    }
+
+    int manipulate_objects_id = glutCreateMenu(manipulate_objs);
+    glutAddMenuEntry("Duplicate Object", 66);
+    glutAddMenuEntry("Delete Object", 67);
+
     glutAddMenuEntry("Move Light 1", 70);
     glutAddMenuEntry("R/G/B/All Light 1", 71);
     glutAddMenuEntry("Move Light 2", 80);
@@ -693,8 +785,27 @@ static void makeMenu()
     glutAddSubMenu("Texture", texMenuId);
     glutAddSubMenu("Ground Texture", groundMenuId);
     glutAddSubMenu("Lights", lightMenuId);
+    glutAddSubMenu("Select Object", selection_id);
+    glutAddSubMenu("Manipulate Object", manipulate_objects_id);
     glutAddMenuEntry("EXIT", 99);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
+}
+
+void refresh(int key, int x, int y)
+{
+    switch (key)
+    {
+    case GLUT_KEY_UP:
+        if (GLUT_MENU_IN_USE == 1)
+        {
+            break;
+        }
+        else if (GLUT_MENU_IN_USE == 0)
+        {
+            makeMenu();
+            break;
+        }
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -868,7 +979,7 @@ int main(int argc, char *argv[])
     glutKeyboardFunc(keyboard);
     glutSpecialFunc(specialKeys);
     glutIdleFunc(idle);
-
+    glutSpecialFunc(refresh);
     glutMouseFunc(mouseClickOrScroll);
     glutPassiveMotionFunc(mousePassiveMotion);
     glutMotionFunc(doToolUpdateXY);
