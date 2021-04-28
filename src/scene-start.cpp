@@ -474,10 +474,10 @@ void display(void)
     glUniform1f(glGetUniformLocation(shaderProgram, "brightness_3"), lightObj3.brightness);
     CheckError();
 
-    glUniform1f(glGetUniformLocation(shaderProgram, "pitch"), light_hori);
+    glUniform1f(glGetUniformLocation(shaderProgram, "horizontal"), light_hori);
     CheckError();
 
-    glUniform1f(glGetUniformLocation(shaderProgram, "yaw"), light_vert);
+    glUniform1f(glGetUniformLocation(shaderProgram, "vertical"), light_vert);
     CheckError();
 
     glUniform3fv(glGetUniformLocation(shaderProgram, "color_1"), 1, lightObj1.rgb);
