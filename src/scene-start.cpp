@@ -79,6 +79,8 @@ int nObjects = 0;                  // How many objects are currenly in the scene
 int currObject = -1;               // The current object
 int toolObj = -1;                  // The object currently being modified
 
+int menu_in_use = 0;
+
 //----------------------------------------------------------------------------
 //
 // Loads a texture by number, and binds it for later use.
@@ -368,6 +370,18 @@ void init(void)
     sceneObjs[1].scale = 0.1;
     sceneObjs[1].texId = 0;        // Plain texture
     sceneObjs[1].brightness = 0.2; // The light's brightness is 5 times this (below).
+    
+    addObject(55); // Sphere for the second light - KV
+    sceneObjs[2].loc = vec4(2.0, 2.0, 1.0, 1.0); // Added height to show in scene
+    sceneObjs[2].scale = 0.1;
+    sceneObjs[2].texId = 0; // Plain texture
+    sceneObjs[2].brightness = 0.2;
+
+    addObject(55); // Third rotational light - KV
+    sceneObjs[3].loc = vec4(2.0, 3.0, 1.0, 1.0); // Added height to see in scene
+    sceneObjs[3].scale = 0.1;
+    sceneObjs[3].texId = 0; // Plain texture
+    sceneObjs[3].brightness = 0.2;
 
     addObject(rand() % numMeshes); // A test mesh
 
@@ -465,13 +479,13 @@ void display(void)
                  1, lightPosition);
     CheckError();
 
-    glUniform1f(glGetUniformLocation(shaderProgram, "brightness"), lightObj1.brightness);
+    glUniform1f(glGetUniformLocation(shaderProgram, "brightness1"), lightObj1.brightness);
     CheckError();
 
-    glUniform1f(glGetUniformLocation(shaderProgram, "brightness_2"), lightObj2.brightness);
+    glUniform1f(glGetUniformLocation(shaderProgram, "brightness2"), lightObj2.brightness);
     CheckError();
 
-    glUniform1f(glGetUniformLocation(shaderProgram, "brightness_3"), lightObj3.brightness);
+    glUniform1f(glGetUniformLocation(shaderProgram, "brightness3"), lightObj3.brightness);
     CheckError();
 
     glUniform1f(glGetUniformLocation(shaderProgram, "horizontal"), light_hori);
@@ -480,13 +494,13 @@ void display(void)
     glUniform1f(glGetUniformLocation(shaderProgram, "vertical"), light_vert);
     CheckError();
 
-    glUniform3fv(glGetUniformLocation(shaderProgram, "color_1"), 1, lightObj1.rgb);
+    glUniform3fv(glGetUniformLocation(shaderProgram, "colour1"), 1, lightObj1.rgb);
     CheckError();
 
-    glUniform3fv(glGetUniformLocation(shaderProgram, "color_2"), 1, lightObj2.rgb);
+    glUniform3fv(glGetUniformLocation(shaderProgram, "colour2"), 1, lightObj2.rgb);
     CheckError();
 
-    glUniform3fv(glGetUniformLocation(shaderProgram, "color_3"), 1, lightObj3.rgb);
+    glUniform3fv(glGetUniformLocation(shaderProgram, "colour3"), 1, lightObj3.rgb);
     CheckError();
 
     for (int i = 0; i < nObjects; i++)
@@ -745,6 +759,17 @@ static void manipulate_objs(int id) {
     }
 }
 
+static void menu_status(int status, int x, int y)
+{
+    if (status == GLUT_MENU_IN_USE) {
+        menu_in_use = 1;
+    }
+
+    else {
+        menu_in_use = 0;
+    }
+}
+
 static void makeMenu()
 {
     int objectId = createArrayMenu(numMeshes, objectMenuEntries, objectMenu);
@@ -787,8 +812,10 @@ static void makeMenu()
     glutAddSubMenu("Lights", lightMenuId);
     glutAddSubMenu("Select Object", selection_id);
     glutAddSubMenu("Manipulate Object", manipulate_objects_id);
+
     glutAddMenuEntry("EXIT", 99);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
+    glutMenuStateFunc(menu_status);
 }
 
 void refresh(int key, int x, int y)
@@ -979,7 +1006,9 @@ int main(int argc, char *argv[])
     glutKeyboardFunc(keyboard);
     glutSpecialFunc(specialKeys);
     glutIdleFunc(idle);
+
     glutSpecialFunc(refresh);
+
     glutMouseFunc(mouseClickOrScroll);
     glutPassiveMotionFunc(mousePassiveMotion);
     glutMotionFunc(doToolUpdateXY);
