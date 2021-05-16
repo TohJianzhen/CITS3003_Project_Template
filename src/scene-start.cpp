@@ -1,4 +1,3 @@
-
 #include "Angel.h"
 
 // Open Asset Importer header files (in ../../assimp--3.0.1270/include)
@@ -40,18 +39,18 @@ mat4 view;       // View matrix - set in the display function.
 
 // These are used to set the window title
 char lab[] = "Project1";
-char *programName = NULL; // Set in main
+char* programName = NULL; // Set in main
 int numDisplayCalls = 0;  // Used to calculate the number of frames per second
 
 //------Meshes----------------------------------------------------------------
 // Uses the type aiMesh from ../../assimp--3.0.1270/include/assimp/mesh.h
 //                           (numMeshes is defined in gnatidread.h)
-aiMesh *meshes[numMeshes]; // For each mesh we have a pointer to the mesh to draw
+aiMesh* meshes[numMeshes]; // For each mesh we have a pointer to the mesh to draw
 GLuint vaoIDs[numMeshes];  // and a corresponding VAO ID from glGenVertexArrays
 
 // -----Textures--------------------------------------------------------------
 //                           (numTextures is defined in gnatidread.h)
-texture *textures[numTextures]; // An array of texture pointers - see gnatidread.h
+texture* textures[numTextures]; // An array of texture pointers - see gnatidread.h
 GLuint textureIDs[numTextures]; // Stores the IDs returned by glGenTextures
 
 //------Scene Objects---------------------------------------------------------
@@ -99,7 +98,7 @@ void loadTextureIfNotAlreadyLoaded(int i)
     CheckError();
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textures[i]->width, textures[i]->height,
-                 0, GL_RGB, GL_UNSIGNED_BYTE, textures[i]->rgbData);
+        0, GL_RGB, GL_UNSIGNED_BYTE, textures[i]->rgbData);
     CheckError();
     glGenerateMipmap(GL_TEXTURE_2D);
     CheckError();
@@ -135,7 +134,7 @@ void loadMeshIfNotAlreadyLoaded(int meshNumber)
     if (meshes[meshNumber] != NULL)
         return; // Already loaded
 
-    aiMesh *mesh = loadMesh(meshNumber);
+    aiMesh* mesh = loadMesh(meshNumber);
     meshes[meshNumber] = mesh;
 
 #ifdef __APPLE__
@@ -150,7 +149,7 @@ void loadMeshIfNotAlreadyLoaded(int meshNumber)
     glGenBuffers(1, buffer);
     glBindBuffer(GL_ARRAY_BUFFER, buffer[0]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * (3 + 3 + 3) * mesh->mNumVertices,
-                 NULL, GL_STATIC_DRAW);
+        NULL, GL_STATIC_DRAW);
 
     int nVerts = mesh->mNumVertices;
     // Next, we load the position and texCoord data in parts.
@@ -180,10 +179,10 @@ void loadMeshIfNotAlreadyLoaded(int meshNumber)
 
     // vTexCoord is actually 2D - the third dimension is ignored (it's always 0.0)
     glVertexAttribPointer(vTexCoord, 3, GL_FLOAT, GL_FALSE, 0,
-                          BUFFER_OFFSET(sizeof(float) * 3 * mesh->mNumVertices));
+        BUFFER_OFFSET(sizeof(float) * 3 * mesh->mNumVertices));
     glEnableVertexAttribArray(vTexCoord);
     glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE, 0,
-                          BUFFER_OFFSET(sizeof(float) * 6 * mesh->mNumVertices));
+        BUFFER_OFFSET(sizeof(float) * 6 * mesh->mNumVertices));
     glEnableVertexAttribArray(vNormal);
     CheckError();
 }
@@ -278,7 +277,7 @@ static void adjustScaleY(vec2 sy)
 static void doRotate()
 {
     setToolCallbacks(adjustCamrotsideViewdist, mat2(400, 0, 0, -2),
-                     adjustcamSideUp, mat2(400, 0, 0, -90));
+        adjustcamSideUp, mat2(400, 0, 0, -90));
 }
 
 //------Add an object to the scene--------------------------------------------
@@ -315,7 +314,7 @@ static void addObject(int id)
 
     toolObj = currObject = nObjects++;
     setToolCallbacks(adjustLocXZ, camRotZ(),
-                     adjustScaleY, mat2(0.05, 0, 0, 10.0));
+        adjustScaleY, mat2(0.05, 0, 0, 10.0));
     glutPostRedisplay();
 }
 
@@ -370,14 +369,15 @@ void init(void)
     sceneObjs[1].scale = 0.1;
     sceneObjs[1].texId = 0;        // Plain texture
     sceneObjs[1].brightness = 0.2; // The light's brightness is 5 times this (below).
-    
-    addObject(55); // Sphere for the second light - KV
-    sceneObjs[2].loc = vec4(2.0, 2.0, 1.0, 1.0); // Added height to show in scene
-    sceneObjs[2].scale = 0.1;
-    sceneObjs[2].texId = 0; // Plain texture
-    sceneObjs[2].brightness = 0.2;
 
-    addObject(55); // Third rotational light - KV
+    //part I second Light
+    addObject(55); // Sphere for the first light
+    sceneObjs[2].loc = vec4(1.0, 1.0, 1.0, 1.0);
+    sceneObjs[2].scale = 0.2;
+    sceneObjs[2].texId = 0;        // Plain texture
+    sceneObjs[2].brightness = 0.2; // The light's brightness is 5 times this (below).
+
+    addObject(55);                               // Third rotational light - KV
     sceneObjs[3].loc = vec4(2.0, 3.0, 1.0, 1.0); // Added height to see in scene
     sceneObjs[3].scale = 0.1;
     sceneObjs[3].texId = 0; // Plain texture
@@ -415,11 +415,13 @@ void drawMesh(SceneObject sceneObj)
 
     // Set the model matrix - this should combine translation, rotation and scaling based on what's
     // in the sceneObj structure (see near the top of the program).
+
+    //Part B
     mat4 xRot = RotateX(sceneObj.angles[0]);
     mat4 yRot = RotateX(sceneObj.angles[1]);
     mat4 zRot = RotateX(sceneObj.angles[2]);
     mat4 matrix = xRot * yRot * zRot;
-    mat4 model = Translate(sceneObj.loc) * Scale(sceneObj.scale);
+    mat4 model = Translate(sceneObj.loc) * matrix * Scale(sceneObj.scale);
 
     // Set the model-view matrix for the shaders
     glUniformMatrix4fv(modelViewU, 1, GL_TRUE, view * model);
@@ -435,7 +437,7 @@ void drawMesh(SceneObject sceneObj)
     CheckError();
 
     glDrawElements(GL_TRIANGLES, meshes[sceneObj.meshId]->mNumFaces * 3,
-                   GL_UNSIGNED_INT, NULL);
+        GL_UNSIGNED_INT, NULL);
     CheckError();
 }
 
@@ -453,7 +455,7 @@ void display(void)
 
     view = Translate(0.0, 0.0, -viewDist);
 
-    //Part a
+    //Part A
     mat4 horizontal = RotateY(camRotSidewaysDeg);
     mat4 vertical = RotateX(camRotUpAndOverDeg);
 
@@ -464,10 +466,9 @@ void display(void)
     SceneObject lightObj1 = sceneObjs[1];
     vec4 lightPosition = view * lightObj1.loc;
 
-    //Light 2
-    mat4 light_movement = horizontal * vertical;
+    //Part I
     SceneObject lightObj2 = sceneObjs[2];
-    vec4 light_position_2 = light_movement * lightObj2.loc;
+    vec4 lightPosition2 = horizontal * vertical * lightObj2.loc;
 
     //Light 3
     SceneObject lightObj3 = sceneObjs[3];
@@ -476,13 +477,22 @@ void display(void)
     vec4 light_position_3 = view * lightObj3.loc;
 
     glUniform4fv(glGetUniformLocation(shaderProgram, "LightPosition"),
-                 1, lightPosition);
+        1, lightPosition);
     CheckError();
 
-    glUniform1f(glGetUniformLocation(shaderProgram, "brightness1"), lightObj1.brightness);
+    glUniform4fv(glGetUniformLocation(shaderProgram, "LightPosition2"),
+        1, lightPosition2);
     CheckError();
 
-    glUniform1f(glGetUniformLocation(shaderProgram, "brightness2"), lightObj2.brightness);
+    // Part H modify Brightness and RGB
+    glUniform1f(glGetUniformLocation(shaderProgram, "LightBrightness"), lightObj1.brightness);
+    CheckError();
+    glUniform1f(glGetUniformLocation(shaderProgram, "LightBrightness2"), lightObj2.brightness);
+    CheckError();
+
+    glUniform3fv(glGetUniformLocation(shaderProgram, "LightRGB"), 1, lightObj1.rgb);
+    CheckError();
+    glUniform3fv(glGetUniformLocation(shaderProgram, "LightRGB2"), 1, lightObj2.rgb);
     CheckError();
 
     glUniform1f(glGetUniformLocation(shaderProgram, "brightness3"), lightObj3.brightness);
@@ -494,12 +504,6 @@ void display(void)
     glUniform1f(glGetUniformLocation(shaderProgram, "vertical"), light_vert);
     CheckError();
 
-    glUniform3fv(glGetUniformLocation(shaderProgram, "colour1"), 1, lightObj1.rgb);
-    CheckError();
-
-    glUniform3fv(glGetUniformLocation(shaderProgram, "colour2"), 1, lightObj2.rgb);
-    CheckError();
-
     glUniform3fv(glGetUniformLocation(shaderProgram, "colour3"), 1, lightObj3.rgb);
     CheckError();
 
@@ -507,7 +511,7 @@ void display(void)
     {
         SceneObject so = sceneObjs[i];
 
-        vec3 rgb = so.rgb * lightObj1.rgb * so.brightness * lightObj1.brightness * 2.0;
+        vec3 rgb = so.rgb * so.brightness * 2.0;
         glUniform3fv(glGetUniformLocation(shaderProgram, "AmbientProduct"), 1, so.ambient * rgb);
         CheckError();
         glUniform3fv(glGetUniformLocation(shaderProgram, "DiffuseProduct"), 1, so.diffuse * rgb);
@@ -592,13 +596,26 @@ static void lightMenu(int id)
     {
         toolObj = 1;
         setToolCallbacks(adjustLocXZ, camRotZ(),
-                         adjustBrightnessY, mat2(1.0, 0.0, 0.0, 10.0));
+            adjustBrightnessY, mat2(1.0, 0.0, 0.0, 10.0));
+    }
+    //Part I move light 2
+    else if (id == 80)
+    {
+        toolObj = 2;
+        setToolCallbacks(adjustLocXZ, camRotZ(),
+            adjustBrightnessY, mat2(1.0, 0.0, 0.0, 10.0));
     }
     else if (id >= 71 && id <= 74)
     {
         toolObj = 1;
         setToolCallbacks(adjustRedGreen, mat2(1.0, 0, 0, 1.0),
-                         adjustBlueBrightness, mat2(1.0, 0, 0, 1.0));
+            adjustBlueBrightness, mat2(1.0, 0, 0, 1.0));
+    }
+    else if (id >= 81 && id <= 84)
+    {
+        toolObj = 2;
+        setToolCallbacks(adjustRedGreen, mat2(1.0, 0, 0, 1.0),
+            adjustBlueBrightness, mat2(1.0, 0, 0, 1.0));
     }
     else
     {
@@ -641,13 +658,13 @@ static void materialMenu(int id)
     {
         toolObj = currObject;
         setToolCallbacks(adjustRedGreen, mat2(1, 0, 0, 1),
-                         adjustBlueBrightness, mat2(1, 0, 0, 1));
+            adjustBlueBrightness, mat2(1, 0, 0, 1));
     }
     // You'll need to fill in the remaining menu items here.
+    //Part C
     if (id == 20)
     {
-        toolObj = currObject;
-        setToolCallbacks(adjustAmbienceDiffuse, mat2(2, 0, 0, 10), adjustSpecularShine, mat2(2, 0, 0, 10));
+        setToolCallbacks(adjustAmbienceDiffuse, mat2(1, 0, 0, 1), adjustSpecularShine, mat2(1, 0, 0, 1));
     }
     else
     {
@@ -657,13 +674,15 @@ static void materialMenu(int id)
 
 static void adjustAngleYX(vec2 angle_yx)
 {
+    //change rotation angle direction for part B
     sceneObjs[currObject].angles[1] += angle_yx[0];
-    sceneObjs[currObject].angles[0] += angle_yx[1];
+    sceneObjs[currObject].angles[0] -= angle_yx[1];
 }
 
 static void adjustAngleZTexscale(vec2 az_ts)
 {
-    sceneObjs[currObject].angles[2] += az_ts[0];
+    //change rotation angle direction for part B
+    sceneObjs[currObject].angles[2] -= az_ts[0];
     sceneObjs[currObject].texScale += az_ts[1];
 }
 
@@ -674,14 +693,14 @@ static void mainmenu(int id)
     {
         toolObj = currObject;
         setToolCallbacks(adjustLocXZ, camRotZ(),
-                         adjustScaleY, mat2(0.05, 0, 0, 10));
+            adjustScaleY, mat2(0.05, 0, 0, 10));
     }
     if (id == 50)
         doRotate();
     if (id == 55 && currObject >= 0)
     {
         setToolCallbacks(adjustAngleYX, mat2(400, 0, 0, -400),
-                         adjustAngleZTexscale, mat2(400, 0, 0, 15));
+            adjustAngleZTexscale, mat2(400, 0, 0, 15));
     }
     if (id == 99)
         exit(0);
@@ -699,14 +718,17 @@ static void select_object(int id)
     }
 }
 
-static void manipulate_objs(int id) {
-    if (selected_object == 0 || selected_object < 204) {
+static void manipulate_objs(int id)
+{
+    if (selected_object == 0 || selected_object < 204)
+    {
         return;
     }
 
     deactivateTool();
 
-    if (id == 66) { // Duplicate Object
+    if (id == 66)
+    { // Duplicate Object
         vec2 currPos = currMouseXYworld(camRotSidewaysDeg);
         int duplicate_object_pos = selected_object - 200; // Reverse offset
 
@@ -724,30 +746,37 @@ static void manipulate_objs(int id) {
         glutPostRedisplay();
     }
 
-    if (id == 67) { // Delete Object
+    if (id == 67)
+    { // Delete Object
         //cout << "menu in use = " << sceneObs...; //test
         //int shuffle;
-        if (nObjects <= 4) { //No objects to delete
+        if (nObjects <= 4)
+        { //No objects to delete
             return;
         }
 
-        if ((selected_object - 200) != (nObjects - 1)) {
-            for (int i = 0; i < ((nObjects - 1) - (selected_object - 200) + 1); i++) {
+        if ((selected_object - 200) != (nObjects - 1))
+        {
+            for (int i = 0; i < ((nObjects - 1) - (selected_object - 200) + 1); i++)
+            {
                 sceneObjs[selected_object - 200 + i] = sceneObjs[selected_object - 200 + 1 + i]; //Shuffle items to keep indexing correct.
             }
         }
 
-        else if ((selected_object - 200) == (nObjects - 1)) {
+        else if ((selected_object - 200) == (nObjects - 1))
+        {
             sceneObjs[selected_object - 200] = sceneObjs[selected_object - 200 + 1];
         }
 
         nObjects = nObjects - 1;
-        if (nObjects > 4) {
+        if (nObjects > 4)
+        {
             select_object(nObjects - 1 + 200);
             doRotate();
         }
 
-        else {
+        else
+        {
             currObject = -1;
             toolObj = -1;
             selected_object = 0;
@@ -755,17 +784,18 @@ static void manipulate_objs(int id) {
         }
 
         glutPostRedisplay();
-
     }
 }
 
 static void menu_status(int status, int x, int y)
 {
-    if (status == GLUT_MENU_IN_USE) {
+    if (status == GLUT_MENU_IN_USE)
+    {
         menu_in_use = 1;
     }
 
-    else {
+    else
+    {
         menu_in_use = 0;
     }
 }
@@ -776,7 +806,7 @@ static void makeMenu()
 
     int materialMenuId = glutCreateMenu(materialMenu);
     glutAddMenuEntry("R/G/B/All", 10);
-    glutAddMenuEntry("UNIMPLEMENTED: Ambient/Diffuse/Specular/Shine", 20);
+    glutAddMenuEntry("Ambient/Diffuse/Specular/Shine", 20);
 
     int texMenuId = createArrayMenu(numTextures, textureMenuEntries, texMenu);
     int groundMenuId = createArrayMenu(numTextures, textureMenuEntries, groundMenu);
@@ -784,12 +814,12 @@ static void makeMenu()
     int selection_id = glutCreateMenu(select_object);
     int lightMenuId = glutCreateMenu(lightMenu);
 
-    for (int i = 4; i < nObjects; i++) {
+    for (int i = 4; i < nObjects; i++)
+    {
         char fig_name[248];
         strcpy(fig_name, objectMenuEntries[sceneObjs[i].meshId - 1]);
-        int new_objects_id = i + 200; 
-        glutAddMenuEntry(strcat(fig_name, textureMenuEntries[sceneObjs[i].texId - 1]), new_objects_id); 
-
+        int new_objects_id = i + 200;
+        glutAddMenuEntry(strcat(fig_name, textureMenuEntries[sceneObjs[i].texId - 1]), new_objects_id);
     }
 
     int manipulate_objects_id = glutCreateMenu(manipulate_objs);
@@ -911,21 +941,23 @@ void reshape(int width, int height)
     //         that the same part of the scene is visible across the width of
     //         the window.
 
+    //Part D temporary solution?
     GLfloat nearDist = 0.01;
 
-    if (width > height)
+    //Part E
+    if (width >= height)
     {
         projection = Frustum(-nearDist * (float)width / (float)height,
-                             nearDist * (float)width / (float)height,
-                             -nearDist, nearDist,
-                             nearDist, 100.0);
+            nearDist * (float)width / (float)height,
+            -nearDist, nearDist,
+            nearDist, 100.0);
     }
     else
     {
         projection = Frustum(-nearDist, nearDist,
-                             -nearDist * (float)width / (float)height,
-                             nearDist * (float)width / (float)height,
-                             nearDist, 100.0);
+            -nearDist * (float)height / (float)width,
+            nearDist * (float)height / (float)width,
+            nearDist, 100.0);
     }
 }
 
@@ -935,7 +967,7 @@ void timer(int unused)
 {
     char title[256];
     sprintf(title, "%s %s: %d Frames Per Second @ %d x %d",
-            lab, programName, numDisplayCalls, windowWidth, windowHeight);
+        lab, programName, numDisplayCalls, windowWidth, windowHeight);
 
     glutSetWindowTitle(title);
 
@@ -950,7 +982,7 @@ char dirDefault3[] = "/tmp/models-textures";
 char dirDefault4[] = "/d/models-textures";
 char dirDefault2[] = "/cslinux/examples/CITS3003/project-files/models-textures";
 
-void fileErr(char *fileName)
+void fileErr(char* fileName)
 {
     printf("Error reading file: %s\n", fileName);
     printf("When not in the CSSE labs, you will need to include the directory containing\n");
@@ -960,11 +992,11 @@ void fileErr(char *fileName)
 
 //----------------------------------------------------------------------------
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     // Get the program name, excluding the directory, for the window title
     programName = argv[0];
-    for (char *cpointer = argv[0]; *cpointer != 0; cpointer++)
+    for (char* cpointer = argv[0]; *cpointer != 0; cpointer++)
         if (*cpointer == '/' || *cpointer == '\\')
             programName = cpointer + 1;
 
