@@ -481,7 +481,7 @@ void display(void)
     CheckError();
 
     glUniform4fv(glGetUniformLocation(shaderProgram, "LightPosition2"),
-        1, lightPosition2);
+                 1, lightPosition2);
     CheckError();
 
     // Part H modify Brightness and RGB
@@ -603,7 +603,7 @@ static void lightMenu(int id)
     {
         toolObj = 2;
         setToolCallbacks(adjustLocXZ, camRotZ(),
-            adjustBrightnessY, mat2(1.0, 0.0, 0.0, 10.0));
+                         adjustBrightnessY, mat2(1.0, 0.0, 0.0, 10.0));
     }
     else if (id >= 71 && id <= 74)
     {
@@ -615,7 +615,7 @@ static void lightMenu(int id)
     {
         toolObj = 2;
         setToolCallbacks(adjustRedGreen, mat2(1.0, 0, 0, 1.0),
-            adjustBlueBrightness, mat2(1.0, 0, 0, 1.0));
+                         adjustBlueBrightness, mat2(1.0, 0, 0, 1.0));
     }
     else
     {
@@ -739,7 +739,7 @@ static void manipulate_objs(int id)
         // Essentially replicating function to add new object to scene.
         toolObj = currObject = nObjects++;
         setToolCallbacks(adjustLocXZ, camRotZ(),
-            adjustScaleY, mat2(0.05, 0, 0, 10.0));
+                         adjustScaleY, mat2(0.05, 0, 0, 10.0));
 
         selected_object = 0; // No object is now selected.
 
