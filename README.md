@@ -1,3 +1,6 @@
+# Contributors:
+1. Jianzhen Toh (22582509)
+2. Nathania Chrestella Teruna (22642853)
 # Build Instructions:
 
 ## General Remarks
