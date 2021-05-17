@@ -36,19 +36,6 @@ To clean the project (one of):
 
 ## Some required dependencies (somethings may be missing):
 
-#### Linux:
-
-* (If you could build the labs, the only extra thing you need is cmake.)
-* A build chain, like: gcc/g++ or clang, etc
-* The build tool: `cmake` https://coderefinery.github.io/installation/cmake/
-* Some dev dependenices, which for me on a fresh Ubuntu 20.04 VM are: `sudo apt install cmake libxmu-dev g++ libx11-dev libgl1-mesa-dev libglu1-mesa-dev`
-
-#### Mac:
-
-* A build chain, like: gcc/g++ or clang, etc
-* The build tool: `cmake` https://coderefinery.github.io/installation/cmake (make sure to add the binary to PATH)
-* x11 from https://xquartz.org
-
 #### Windows:
 
 * (If you could build the Windows-Labs Windows port of the labs then you already have everything)
