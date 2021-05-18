@@ -20,3 +20,5 @@ The general overview of this project consists of multiple method implementations
   to clean:
   > cmake --build cmake-build-debug --target clean
 
+# Further notes:
+All modified files reside in the `res` and `src` folders
